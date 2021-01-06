@@ -1,6 +1,22 @@
 # Default bindings
-bindgen --whitelist-function "ovr.*" --whitelist-function "vrapi.*" --whitelist-type "ovr.*" --whitelist-var "VRAPI.*" --rustified-enum "ovr.*" -o src/bindings.rs VrApi/wrapper.h -- -std=c99 -I/usr/include/clang/3.9/include
+bindgen \
+  --whitelist-function "ovr.*" \
+  --whitelist-function "vrapi.*" \
+  --whitelist-type "ovr.*" \
+  --whitelist-var "VRAPI.*" \
+  --rustified-enum "ovr.*" \
+  -o src/bindings.rs \
+  VrApi-1.40/wrapper.h -- -std=c99 \
+  -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
 
 # Android bindings
-ANDROID_INCLUDES="$ANDROID_NDK/platforms/android-18/arch-arm/usr/include"
-bindgen --whitelist-function "ovr.*" --whitelist-function "vrapi.*" --whitelist-type "ovr.*" --whitelist-var "VRAPI.*" --rustified-enum "ovr.*" -o src/bindings_android.rs VrApi/wrapper.h -- -std=c99 -D__ANDROID__ -DANDROID -I$ANDROID_INCLUDES -I/usr/include/clang/3.9/include
+bindgen \
+  --whitelist-function "ovr.*" \
+  --whitelist-function "vrapi.*" \
+  --whitelist-type "ovr.*" \
+  --whitelist-var "VRAPI.*" \
+  --rustified-enum "ovr.*" \
+  -o src/bindings_android.rs \
+  VrApi-1.40/wrapper.h -- -std=c99 -D__ANDROID__ -DANDROID \
+  -I/usr/local/share/android-ndk/sysroot/usr/include/aarch64-linux-android \
+  -I/usr/local/share/android-ndk/sysroot/usr/include
