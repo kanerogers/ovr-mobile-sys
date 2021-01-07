@@ -9,3 +9,6 @@ homepage = "https://github.com/MortimerGoro/ovr-mobile-sys"
 repository = "https://github.com/MortimerGoro/ovr-mobile-sys"
 keywords = ["vr", "oculus", "mobile", "sdk", "gear"]
 license = "Apache-2.0"
+
+[dependencies]
+jni-sys = "0.3.0"

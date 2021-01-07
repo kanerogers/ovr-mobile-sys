@@ -3,10 +3,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
-#[cfg(not(target_os = "android"))]
-include!("bindings.rs");
+extern crate jni_sys;
+use jni_sys::{JNINativeInterface_ as JNINativeInterface, JNIInvokeInterface_ as JNIInvokeInterface};
 
-#[cfg(target_os = "android")]
 include!("bindings_android.rs");
-
-pub mod helpers;
