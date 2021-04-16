@@ -4,6 +4,7 @@
 #![allow(non_snake_case)]
 #![allow(deprecated)]
 #![allow(unused_imports)]
+#[allow(invalid_value)]
 pub mod helpers;
 
 include!("bindings_android.rs");
