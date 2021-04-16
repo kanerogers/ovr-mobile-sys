@@ -6,9 +6,4 @@
 #![allow(unused_imports)]
 pub mod helpers;
 
-extern crate jni_sys;
-use jni_sys::{
-    JNIInvokeInterface_ as JNIInvokeInterface, JNINativeInterface_ as JNINativeInterface,
-};
-
 include!("bindings_android.rs");
