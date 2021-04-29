@@ -1,14 +1,16 @@
 use super::*;
-use std::mem::{self, MaybeUninit};
 use std::ptr;
-
+use std::{
+    ffi::c_void,
+    mem::{self, MaybeUninit},
+};
 
 //-----------------------------------------------------------------
 // Matrix helper functions.
 //-----------------------------------------------------------------
 
 fn ovrVector4f_MultiplyMatrix4f(a: &ovrMatrix4f, v: &ovrVector4f) -> ovrVector4f {
-    let mut out: ovrVector4f = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut out: ovrVector4f = unsafe { MaybeUninit::zeroed().assume_init() };
     out.x = a.M[0][0] * v.x + a.M[0][1] * v.y + a.M[0][2] * v.z + a.M[0][3] * v.w;
     out.y = a.M[1][0] * v.x + a.M[1][1] * v.y + a.M[1][2] * v.z + a.M[1][3] * v.w;
     out.z = a.M[2][0] * v.x + a.M[2][1] * v.y + a.M[2][2] * v.z + a.M[2][3] * v.w;
@@ -18,7 +20,7 @@ fn ovrVector4f_MultiplyMatrix4f(a: &ovrMatrix4f, v: &ovrVector4f) -> ovrVector4f
 
 // Use left-multiplication to accumulate transformations.
 pub fn ovrMatrix4f_Multiply(a: &ovrMatrix4f, b: &ovrMatrix4f) -> ovrMatrix4f {
-    let mut out: ovrMatrix4f = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut out: ovrMatrix4f = unsafe { MaybeUninit::zeroed().assume_init() };
 
     out.M[0][0] = a.M[0][0] * b.M[0][0]
         + a.M[0][1] * b.M[1][0]
@@ -93,7 +95,7 @@ pub fn ovrMatrix4f_Multiply(a: &ovrMatrix4f, b: &ovrMatrix4f) -> ovrMatrix4f {
 
 // Returns the transpose of a 4x4 matrix.
 pub fn ovrMatrix4f_Transpose(a: &ovrMatrix4f) -> ovrMatrix4f {
-    let mut out: ovrMatrix4f = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut out: ovrMatrix4f = unsafe { MaybeUninit::zeroed().assume_init() };
 
     out.M[0][0] = a.M[0][0];
     out.M[0][1] = a.M[1][0];
@@ -137,7 +139,7 @@ pub fn ovrMatrix4f_Inverse(m: &ovrMatrix4f) -> ovrMatrix4f {
             - m.M[0][1] * ovrMatrix4f_Minor(m, 1, 2, 3, 0, 2, 3)
             + m.M[0][2] * ovrMatrix4f_Minor(m, 1, 2, 3, 0, 1, 3)
             - m.M[0][3] * ovrMatrix4f_Minor(m, 1, 2, 3, 0, 1, 2));
-    let mut out: ovrMatrix4f = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut out: ovrMatrix4f = unsafe { MaybeUninit::zeroed().assume_init() };
     out.M[0][0] = ovrMatrix4f_Minor(m, 1, 2, 3, 1, 2, 3) * rcp_det;
     out.M[0][1] = -ovrMatrix4f_Minor(m, 0, 2, 3, 1, 2, 3) * rcp_det;
     out.M[0][2] = ovrMatrix4f_Minor(m, 0, 1, 3, 1, 2, 3) * rcp_det;
@@ -160,7 +162,7 @@ pub fn ovrMatrix4f_Inverse(m: &ovrMatrix4f) -> ovrMatrix4f {
 
 // Returns a 4x4 identity matrix.
 pub fn ovrMatrix4f_CreateIdentity() -> ovrMatrix4f {
-    let mut out: ovrMatrix4f = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut out: ovrMatrix4f = unsafe { MaybeUninit::zeroed().assume_init() };
 
     out.M[0][0] = 1.0;
     out.M[0][1] = 0.0;
@@ -184,7 +186,7 @@ pub fn ovrMatrix4f_CreateIdentity() -> ovrMatrix4f {
 
 // Returns a 4x4 homogeneous translation matrix.
 pub fn ovrMatrix4f_CreateTranslation(x: f32, y: f32, z: f32) -> ovrMatrix4f {
-    let mut out: ovrMatrix4f = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut out: ovrMatrix4f = unsafe { MaybeUninit::zeroed().assume_init() };
 
     out.M[0][0] = 1.0;
     out.M[0][1] = 0.0;
@@ -266,7 +268,7 @@ pub fn ovrMatrix4f_CreateProjection(
     let height = max_y - min_y;
     let offsetZ = near_z; // set to zero for a [0,1] clip space
 
-    let mut out: ovrMatrix4f = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut out: ovrMatrix4f = unsafe { MaybeUninit::zeroed().assume_init() };
     if far_z <= near_z {
         // place the far plane at infinity
         out.M[0][0] = 2.0 * near_z / width;
@@ -341,7 +343,7 @@ pub fn ovrMatrix4f_CreateFromQuaternion(q: &ovrQuatf) -> ovrMatrix4f {
     let yy = q.y * q.y;
     let zz = q.z * q.z;
 
-    let mut out: ovrMatrix4f = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut out: ovrMatrix4f = unsafe { MaybeUninit::zeroed().assume_init() };
     out.M[0][0] = ww + xx - yy - zz;
     out.M[0][1] = 2.0 * (q.x * q.y - q.w * q.z);
     out.M[0][2] = 2.0 * (q.x * q.z + q.w * q.y);
@@ -468,7 +470,7 @@ pub fn ovrMatrix4f_TanAngleMatrixFromUnitSquare(modelView: &ovrMatrix4f) -> ovrM
     let inv = ovrMatrix4f_Inverse(modelView);
     let coef = if inv.M[2][3] > 0.0 { 1.0 } else { -1.0 };
 
-    let mut m: ovrMatrix4f = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut m: ovrMatrix4f = unsafe { MaybeUninit::zeroed().assume_init() };
     m.M[0][0] =
         (0.5 * (inv.M[0][0] * inv.M[2][3] - inv.M[0][3] * inv.M[2][0]) - 0.5 * inv.M[2][0]) * coef;
     m.M[0][1] =
@@ -523,7 +525,7 @@ pub fn ovrMatrix4f_CalculateExternalVelocity(
     let cosHalfAngle = (angle * 0.5).cos();
 
     // Yaw is always going to be around the world Y axis
-    let mut quat: ovrQuatf = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut quat: ovrQuatf = unsafe { MaybeUninit::zeroed().assume_init() };
     quat.x = viewMatrix.M[0][1] * sinHalfAngle;
     quat.y = viewMatrix.M[1][1] * sinHalfAngle;
     quat.z = viewMatrix.M[2][1] * sinHalfAngle;
@@ -720,6 +722,7 @@ pub fn vrapi_DefaultLayerProjection2() -> ovrLayerProjection2 {
     layer.Header.ColorScale.w = 1.0f32;
     layer.Header.SrcBlend = ovrFrameLayerBlend::VRAPI_FRAME_LAYER_BLEND_ONE;
     layer.Header.DstBlend = ovrFrameLayerBlend::VRAPI_FRAME_LAYER_BLEND_ZERO;
+    layer.Header.Reserved = ptr::null_mut::<c_void>();
 
     layer.HeadPose.Pose.Orientation.w = 1.0f32;
 
@@ -735,7 +738,7 @@ pub fn vrapi_DefaultLayerProjection2() -> ovrLayerProjection2 {
 }
 
 pub fn vrapi_DefaultLayerBlackProjection2() -> ovrLayerProjection2 {
-    let mut layer: ovrLayerProjection2 = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut layer: ovrLayerProjection2 = unsafe { MaybeUninit::zeroed().assume_init() };
 
     layer.Header.Type = ovrLayerType2_::VRAPI_LAYER_TYPE_PROJECTION2;
     layer.Header.Flags = 0;
@@ -747,7 +750,7 @@ pub fn vrapi_DefaultLayerBlackProjection2() -> ovrLayerProjection2 {
     layer.Header.SrcBlend = ovrFrameLayerBlend::VRAPI_FRAME_LAYER_BLEND_ONE;
     layer.Header.DstBlend = ovrFrameLayerBlend::VRAPI_FRAME_LAYER_BLEND_ZERO;
 
-    layer.HeadPose.Pose.Orientation.w = 1.0f32;
+    layer.HeadPose.Pose.Orientation.w = 1.0;
 
     for eye in 0..ovrFrameLayerEye::VRAPI_FRAME_LAYER_EYE_MAX as usize {
         layer.Textures[eye].SwapChainIndex = 0;
@@ -760,7 +763,7 @@ pub fn vrapi_DefaultLayerBlackProjection2() -> ovrLayerProjection2 {
 }
 
 pub fn vrapi_DefaultLayerCylinder2() -> ovrLayerCylinder2 {
-    let mut layer: ovrLayerCylinder2 = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut layer: ovrLayerCylinder2 = unsafe { MaybeUninit::zeroed().assume_init() };
 
     let projectionMatrix =
         ovrMatrix4f_CreateProjectionFov(90.0f32, 90.0f32, 0.0f32, 0.0f32, 0.1f32, 0.0f32);
@@ -793,7 +796,7 @@ pub fn vrapi_DefaultLayerCylinder2() -> ovrLayerCylinder2 {
 }
 
 pub fn vrapi_DefaultLayerCube2() -> ovrLayerCube2 {
-    let mut layer: ovrLayerCube2 = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut layer: ovrLayerCube2 = unsafe { MaybeUninit::zeroed().assume_init() };
 
     let projectionMatrix =
         ovrMatrix4f_CreateProjectionFov(90.0f32, 90.0f32, 0.0f32, 0.0f32, 0.1f32, 0.0f32);
@@ -819,7 +822,7 @@ pub fn vrapi_DefaultLayerCube2() -> ovrLayerCube2 {
 }
 
 pub fn vrapi_DefaultLayerEquirect2() -> ovrLayerEquirect2 {
-    let mut layer: ovrLayerEquirect2 = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut layer: ovrLayerEquirect2 = unsafe { MaybeUninit::zeroed().assume_init() };
 
     let projectionMatrix =
         ovrMatrix4f_CreateProjectionFov(90.0f32, 90.0f32, 0.0f32, 0.0f32, 0.1f32, 0.0f32);
@@ -852,7 +855,7 @@ pub fn vrapi_DefaultLayerEquirect2() -> ovrLayerEquirect2 {
 }
 
 pub fn vrapi_DefaultLayerLoadingIcon2() -> ovrLayerLoadingIcon2 {
-    let mut layer: ovrLayerLoadingIcon2 = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut layer: ovrLayerLoadingIcon2 = unsafe { MaybeUninit::zeroed().assume_init() };
 
     layer.Header.Type = ovrLayerType2_::VRAPI_LAYER_TYPE_LOADING_ICON2;
     layer.Header.Flags = 0;
